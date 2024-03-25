@@ -44,6 +44,5 @@ const RequestDelete = async (path = "") => {
 export {
     RequestDelete,
     RequestGet,
-    RequestPut,
-    RequestPost, APIURL
+    RequestPut, RequestPost, APIURL
 }

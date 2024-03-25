@@ -1,10 +1,10 @@
 {
   "users": [
     {
-      "id": 1,
       "username": "Khaetbek",
-      "email": "khaetbek@internet.ru",
-      "body": "Hello world!"
+      "body": "Hello world!",
+      "email": "kahetbek@web.dev",
+      "id": 1
     }
   ]
 }
