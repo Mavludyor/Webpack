@@ -1,5 +1,21 @@
 import { RequestDelete, RequestGet, RequestPost, RequestPut } from "./api";
 
+const LocalStorage = () => {
+    const usersData = localStorage.getItem("users");
+    const users = JSON.parse(usersData);
+
+    if (!users){
+        localStorage.setItem("users", JSON.stringify([]))
+    } else {
+        RequestGet("/users").then(data => {
+           // const newUserData = users.concat(data)
+            // console.log(newUserData);
+    
+            localStorage.setItem("users", JSON.stringify(data))
+        })
+    }
+}
+
 const Init = () => {
     const container = document.querySelector("#table tbody");
 
@@ -17,6 +33,10 @@ const Init = () => {
     const inputEmail = document.querySelector("#user-email");
     const inputComment = document.querySelector("#user-comment");
 
+    LocalStorage();
+
+    const usersData = JSON.parse(localStorage.getItem("users"))
+
     inputUsername.addEventListener("input", () => {
         user.username = inputUsername.value;
     })
@@ -31,11 +51,12 @@ const Init = () => {
 
     container.innerHTML = `<tr><td>Loading...</td></tr>`
 
-    RequestGet("/users").then(data => {
+    if(usersData?.length) {
         container.innerHTML = "";
+        LocalStorage();
 
-        data.forEach((user, index) => {
-            index += 1
+        usersData.forEach((user, index) => {
+            index += 1;
             container.insertAdjacentHTML("beforeend", `
                 <tr>
                     <th scope="row">${index}</th>
@@ -50,52 +71,16 @@ const Init = () => {
                     </td>
                 </tr>
             `);
-        });
+        })
+    }
 
-        const patchButtons = document.querySelectorAll("[data-user-patch-id]")
-        const deleteButtons = document.querySelectorAll("[data-user-delete-id]")
-
-        if (
-            (patchButtons && patchButtons?.length) ||
-            (deleteButtons && deleteButtons?.length)
-        ) {
-            patchButtons.forEach(patchButton => {
-                const currentButton = patchButton;
-
-                currentButton.addEventListener("click", e => {
-                    const id = e.target.dataset.userPatchId;
-
-                    if (
-                        inputEmail.value == "" ||
-                        inputComment.value == "" ||
-                        inputUsername.value == ""
-                    ) {
-
-                        RequestGet(`/users/${id}`).then(data => {
-                            inputComment.value = data.body;
-                            inputEmail.value = data.email;
-                            inputUsername.value = data.username;
-
-                            inputUserId.value = data.id;
-                        })
-
-                    } else {
-                        RequestPut(`/users/${id}`, user).then(() => {
-                            alert("Updated")
-                        }).catch(error => {
-                            alert(`Xatolik: ${error.message}`);
-                            console.error(error);
-                        })
-                    }
-                })
-            })
-        }
-    })
+   
 
 
     buttonPost.addEventListener("click", () => {
         RequestPost("/users", user).then(() => {
             alert("POSTED")
+            LocalStorage();
         }).catch(error => {
             alert(`Sizning xatoingiz: ${error.message}`);
             console.error(error)
@@ -118,6 +103,7 @@ const Init = () => {
         } else {
             RequestPut(`/users/${inputUserId.value}`, user).then(() => {
                 alert("PATCHED");
+                LocalStorage();
             }).catch(error => {
                 alert(`Sizning xatoingiz: ${error.message}`);
                 console.error(error)
@@ -128,6 +114,7 @@ const Init = () => {
     buttonDelete.addEventListener("click", () => {
         RequestDelete(`/users/${inputUserId.value}`).then(() => {
             alert("DELETED");
+            LocalStorage();
         }).catch(error => {
             alert(`Xatolik: ${error.message}`);
             console.error(error);
